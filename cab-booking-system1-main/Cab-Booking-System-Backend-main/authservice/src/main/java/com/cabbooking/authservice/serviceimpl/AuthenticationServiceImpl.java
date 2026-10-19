@@ -187,14 +187,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (ROLE_DRIVER.equalsIgnoreCase(role)) {
             response = driverClient.deleteDriver(email);
-            if(response.getStatusCode() == HttpStatus.OK) {
-                userRepository.deleteByEmail(email);
-            }
         } else {
             response = userClient.deleteUser(email);
-            if(response.getStatusCode() == HttpStatus.OK) {
-                userRepository.deleteByEmail(email);
-            }
         }
 
         if (response.getStatusCode() == HttpStatus.OK) {

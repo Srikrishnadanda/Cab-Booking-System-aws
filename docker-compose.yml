@@ -1,0 +1,220 @@
+version: '3.8'
+
+networks:
+  cab-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+
+services:
+  # ========================================================
+  # 1. DATABASE
+  # ========================================================
+
+  
+
+  # ========================================================
+  # 2. SERVICE REGISTRY (EUREKA)
+  # ========================================================
+  eurekaserver:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/eurekaserver
+    container_name: cab-eureka
+    restart: on-failure
+    ports:
+      - "8761:8761"
+    environment:
+      - SERVER_PORT=8761
+      - EUREKA_INSTANCE_HOSTNAME=eurekaserver
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 3. AUTH SERVICE
+  # ========================================================
+  authservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/authservice
+    container_name: cab-authservice
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_auth?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 4. USER SERVICE
+  # ========================================================
+  userservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/userservice
+    container_name: cab-userservice
+    restart: on-failure
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_users?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 5. DRIVER SERVICE
+  # ========================================================
+  driverservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/driverservice
+    container_name: cab-driverservice
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_drivers?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 6. RIDE SERVICE
+  # ========================================================
+  rideservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/rideservice
+    container_name: cab-rideservice
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_rides?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 7. LOCATION SERVICE
+  # ========================================================
+  locationservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/locationservice
+    container_name: cab-locationservice
+    restart: on-failure
+    ports:
+      - "8086:8086"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_locations?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 8. PAYMENT SERVICE
+  # ========================================================
+  paymentservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/paymentservice
+    container_name: cab-paymentservice
+    restart: on-failure
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_payment?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 9. RATING SERVICE
+  # ========================================================
+  ratingservice:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/ratingservice
+    container_name: cab-ratingservice
+    restart: on-failure
+    ports:
+      - "8087:8087"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cab_booking_rating?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sri@12345
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network
+
+  # ========================================================
+  # 10. API GATEWAY
+  # ========================================================
+  apigateway:
+    build:
+      context: ./cab-booking-system1-main/Cab-Booking-System-Backend-main/apigateway
+    container_name: cab-apigateway
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eurekaserver
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    networks:
+      - cab-network

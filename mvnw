@@ -1,0 +1,10 @@
+apigateway - True, pom: True, .mvn: True
+authservice - True, pom: True, .mvn: True
+configserver - True, pom: True, .mvn: True
+driverservice - True, pom: True, .mvn: True
+eurekaserver - True, pom: True, .mvn: True
+locationservice - True, pom: True, .mvn: True
+paymentservice - True, pom: True, .mvn: True
+ratingservice - True, pom: True, .mvn: True
+rideservice - True, pom: True, .mvn: True
+userservice - True, pom: True, .mvn: True
