@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: cab-booking
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: "Sri@12345"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-config
+  namespace: cab-booking
+data:
+  init-db.sql: |
+    CREATE DATABASE IF NOT EXISTS cab_booking_auth;
+    CREATE DATABASE IF NOT EXISTS cab_booking_users;
+    CREATE DATABASE IF NOT EXISTS cab_booking_drivers;
+    CREATE DATABASE IF NOT EXISTS cab_booking_rides;
+    CREATE DATABASE IF NOT EXISTS cab_booking_locations;
+    CREATE DATABASE IF NOT EXISTS cab_booking_payment;
+    CREATE DATABASE IF NOT EXISTS cab_booking_rating;
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'Sri@12345';
+    FLUSH PRIVILEGES;
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: cab-booking
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: cab-booking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/init-db.sql
+              subPath: init-db.sql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: init-script
+          configMap:
+            name: mysql-init-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: cab-booking
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
